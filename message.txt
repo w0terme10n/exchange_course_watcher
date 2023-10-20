@@ -1,0 +1,11 @@
+🔥ATTENTION🔥
+
+<u>{ticker}</u>
+New price: {new_price}
+Old price: {old_price}
+Diff: +{diff} (+{percent_diff}%)
+📈Pump in the last <b>{minutes} minutes</b>🔝
+
+⚠️<u>No way constitutes investment
+advice or any incentive whatsoever
+to buy or sell financial instruments.</u>⚠️
