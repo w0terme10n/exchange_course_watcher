@@ -1,49 +1,42 @@
-from utils import get_config
+from utils import get_config, send_alert_message
 from loguru import logger
+
 import time
 import json
-import requests
+import os
 
 
-def send_message_to_telegram(config, msg):
-    bot_token = config['demo_bot']['demo_bot_token']
-    url = f'https://api.telegram.org/bot{bot_token}/sendPhoto'
-    chat_id = config['demo_bot']['demo_chat_id']
-    k = 0
-    r = {'ok': False}
-    while not r['ok'] and k < 5:
-        try:
-            r = requests.post(
-                url, data={
-                    'chat_id': chat_id, 'caption': msg, 'parse_mode': 'HTML'
-                }, files={'photo': open('graph.png', 'rb')}
-            ).json()
-            if not r['ok']:
-                logger.error(f'Error sending msg to {chat_id}\n{r["description"]}')
-        except Exception as e:
-            logger.error(e)
-        k += 1
+def get_sleep_hours():
+    return float(get_config()['demo_bot']['sleep_hours'])
 
 
 def main():
-    sleep_hours = float(get_config()['demo_bot']['sleep_hours'])
+    last_msg_filename = 'temp/last_msg.json'
+    if not os.path.exists('temp/'):
+        os.mkdir('temp')
+    if not os.path.exists(last_msg_filename):
+        with open(last_msg_filename, 'w') as f:
+            json.dump({'time': int(time.time())}, f)
+    sleep_hours = get_sleep_hours()
     while True:
         try:
-            with open('last_msg.json') as f:
+            with open(last_msg_filename) as f:
                 msg = json.load(f)
             while True:
                 try:
-                    with open('last_msg.json') as file:
+                    with open(last_msg_filename) as file:
                         new_msg = json.load(file)
                     if msg['time'] != new_msg['time']:
-                        send_message_to_telegram(get_config(), new_msg['msg'])
+                        with open('temp/graph.png', 'rb') as f:
+                            image = f.read()
+                        send_alert_message(get_config(), new_msg['msg'], image)
                         break
                     time.sleep(1)
                 except json.decoder.JSONDecodeError:
                     pass
             while True:
                 try:
-                    sleep_hours = float(get_config()['demo_bot']['sleep_hours'])
+                    sleep_hours = get_sleep_hours()
                     break
                 except Exception as exc:
                     logger.error(exc)

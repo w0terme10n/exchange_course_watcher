@@ -3,10 +3,10 @@ from configparser import RawConfigParser
 
 import subprocess
 import logging
+from utils import get_config
 
 
-config = RawConfigParser()
-config.read('config.cfg')
+config = get_config()
 API_TOKEN = config['telegram']['token']
 BYBIT_WATCHER_SERVICE_NAME = config['bybit']['service_name']
 KUCOIN_WATCHER_SERVICE_NAME = config['kucoin']['service_name']
