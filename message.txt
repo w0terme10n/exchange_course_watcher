@@ -10,6 +10,8 @@
 📊24 hours change: {yesterday_change}%
 📝30 minutes change: {half_hour_change}%
 
+{news}
+
 ⚠️<u>No way constitutes investment
 advice or any incentive whatsoever
 to buy or sell financial instruments.</u>⚠️
