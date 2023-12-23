@@ -1,13 +1,9 @@
-from utils import get_config, send_alert_message
+from utils import get_config, send_photo_to_telegram
 from loguru import logger
 
 import time
 import json
 import os
-
-
-def get_sleep_hours():
-    return float(get_config()['demo_bot']['sleep_hours'])
 
 
 def main():
@@ -17,7 +13,10 @@ def main():
     if not os.path.exists(last_msg_filename):
         with open(last_msg_filename, 'w') as f:
             json.dump({'time': int(time.time())}, f)
-    sleep_hours = get_sleep_hours()
+    config = get_config()
+    sleep_hours = float(config['demo_bot']['sleep_hours'])
+    demo_chat_id = get_config()['demo_bot']['demo_chat_id']
+    demo_bot_token = get_config()['demo_bot']['demo_bot_token']
     while True:
         try:
             with open(last_msg_filename) as f:
@@ -29,17 +28,11 @@ def main():
                     if msg['time'] != new_msg['time']:
                         with open('temp/graph.png', 'rb') as f:
                             image = f.read()
-                        send_alert_message(get_config(), new_msg['msg'], image)
+                        send_photo_to_telegram(demo_bot_token, demo_chat_id, new_msg['msg'], image)
                         break
                     time.sleep(1)
                 except json.decoder.JSONDecodeError:
                     pass
-            while True:
-                try:
-                    sleep_hours = get_sleep_hours()
-                    break
-                except Exception as exc:
-                    logger.error(exc)
             time.sleep(60*60*sleep_hours)
         except Exception as e:
             logger.error(e)
