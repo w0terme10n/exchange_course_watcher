@@ -192,8 +192,12 @@ def sender(config: RawConfigParser, exchange_name: str) -> None:
                 if old_price * (1 + percent_difference / 100) <= new_price:
                     now_time = exchange.fetch_time()
                     yesterday_timestamp = now_time - 24*60*60*10**3
-                    yesterday_price = exchange.fetch_ohlcv(ticker, '1m', yesterday_timestamp, 1)[0][4]
-                    yesterday_change = round(Decimal((new_price/yesterday_price-1)*100), nums_precision)
+                    try:
+                        yesterday_price = exchange.fetch_ohlcv(ticker, '1m', yesterday_timestamp, 1)[0][4]
+                        yesterday_change = round(Decimal((new_price/yesterday_price-1)*100), nums_precision)
+                    except Exception as e:
+                        logger.error(e)
+                        break
 
                     half_hour_timestamp = now_time - 30*60*10**3
                     half_hour_price = exchange.fetch_ohlcv(ticker, '1m', half_hour_timestamp, 1)[0][4]
