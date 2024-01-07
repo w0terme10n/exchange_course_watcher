@@ -150,8 +150,11 @@ def course_watcher(exchange, exchange_name: str, nums_precision: int) -> None:
     watcher(exchange, exchange_name, nums_precision)
     schedule.every(1).minutes.do(lambda: watcher(exchange, exchange_name, nums_precision))
     while True:
-        schedule.run_pending()
-        time.sleep(0.1)
+        try:
+            schedule.run_pending()
+            time.sleep(0.1)
+        except Exception as e:
+            logger.error(e)
 
 
 def sender(config: RawConfigParser, exchange_name: str) -> None:
