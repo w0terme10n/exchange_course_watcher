@@ -109,8 +109,7 @@ def watcher(exchange, exchange_name: str, nums_precision: int) -> None:
         tickers_prices = get_tickers_prices(exchange, exchange_name, nums_precision)
         k += 1
         if k > 10:
-            logger.error(f'{exchange_name} | Too many errors while getting tickers. Exit.')
-            return
+            logger.error(f'{exchange_name} | Too many errors while getting tickers.')
     data_filename = f'temp/{exchange_name}_tickers.json'
     if os.path.exists(data_filename):
         try:
@@ -195,16 +194,17 @@ def sender(config: RawConfigParser, exchange_name: str) -> None:
                 if old_price * (1 + percent_difference / 100) <= new_price:
                     now_time = exchange.fetch_time()
                     yesterday_timestamp = now_time - 24*60*60*10**3
+                    half_hour_timestamp = now_time - 30*60*10**3
                     try:
                         yesterday_price = exchange.fetch_ohlcv(ticker, '1m', yesterday_timestamp, 1)[0][4]
                         yesterday_change = round(Decimal((new_price/yesterday_price-1)*100), nums_precision)
+            
+                        half_hour_price = exchange.fetch_ohlcv(ticker, '1m', half_hour_timestamp, 1)[0][4]
+                        half_hour_change = round(Decimal((new_price/half_hour_price-1)*100), nums_precision)
                     except Exception as e:
                         logger.error(e)
                         break
 
-                    half_hour_timestamp = now_time - 30*60*10**3
-                    half_hour_price = exchange.fetch_ohlcv(ticker, '1m', half_hour_timestamp, 1)[0][4]
-                    half_hour_change = round(Decimal((new_price/half_hour_price-1)*100), nums_precision)
                     with open('message.txt') as f:
                         msg = f.read()
                     if is_have_recent_news(config, ticker.split('/')[0]):
